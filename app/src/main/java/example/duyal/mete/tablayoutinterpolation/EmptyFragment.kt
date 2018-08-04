@@ -24,8 +24,7 @@ class EmptyFragment : Fragment() {
         private var fragment: EmptyFragment? = null
 
         fun newInstance(text: String): EmptyFragment {
-//            if (fragment == null)
-                fragment = EmptyFragment()
+            fragment = EmptyFragment()
 
             val bundle = Bundle()
             bundle.putString("text", text)

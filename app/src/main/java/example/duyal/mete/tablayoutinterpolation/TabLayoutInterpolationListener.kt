@@ -13,22 +13,21 @@ import android.support.v4.view.ViewPager.SCROLL_STATE_IDLE
 
 class TabLayoutInterpolationListener(tabLayout: TabLayout, context: Context) : ViewPager.OnPageChangeListener {
     //region Fields
-    private var mTabLayout: TabLayout = tabLayout
-    private var lastSumPosAndPosOffset: Float = 0.toFloat()
-    private var mArgbEvaluator: ArgbEvaluator = ArgbEvaluator()
-    private var mTabColor: Int = 0
-    private var mSelectedColor: Int = ContextCompat.getColor(context, R.color.tab_active)
-    private var mUnselectedColor: Int = ContextCompat.getColor(context, R.color.tab_passive)
+    private var mTabLayout = tabLayout
+    private var lastSumPosAndPosOffset = 0F
+    private var mArgbEvaluator = ArgbEvaluator()
+    private var mTabColor = 0
+    private var mSelectedColor = ContextCompat.getColor(context, R.color.tab_active)
+    private var mUnselectedColor = ContextCompat.getColor(context, R.color.tab_passive)
     private var mCurrentTextView: TextView? = null
     private var mNextTextView: TextView? = null
     private var mIsClicked = true
-    private var mCurrentIndex: Int = 0
-    private var mNextIndex: Int = 0
-    private var mContext: Context = context
+    private var mCurrentIndex = 0
+    private var mNextIndex = 0
+    private var mContext = context
     // CurrentIndex and nextIndex are wrong at first initialize.
     // mIsInitialized field added to get correct reference of current and next text view.
     private var mIsInitialized = false
-    private var mOnlyOnce = true
     //endregion
 
 
@@ -51,56 +50,42 @@ class TabLayoutInterpolationListener(tabLayout: TabLayout, context: Context) : V
         })
 
     }
-    //endregion
 
     //region Listener
     override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
-            if (position == 0) {
-                changeCurrentTabTextColor(position, false, positionOffset, mSelectedColor, mUnselectedColor)
-                checkInitialize()
-            }
+        if (position == 0) {
+            changeCurrentTabTextColor(position, positionOffset, mSelectedColor, mUnselectedColor)
+            checkInitialize()
+        }
 
-            if (!mIsClicked) {
-                if (position + positionOffset > lastSumPosAndPosOffset) {
-                    changeCurrentTabTextColor(position, false, positionOffset, mSelectedColor, mUnselectedColor)
+        if (!mIsClicked) {
+            if (position + positionOffset > lastSumPosAndPosOffset) {
+                changeCurrentTabTextColor(position, positionOffset, mSelectedColor, mUnselectedColor)
 
-                    if (position != mTabLayout.tabCount - 1) {
-                        changeNextTabTextColor(position + 1, 1 - positionOffset, mSelectedColor, mUnselectedColor)
-                    }
-                } else {
-                    if (position != mTabLayout.tabCount - 1) {
-                        changeCurrentTabTextColor(position + 1, false, 1 - positionOffset, mSelectedColor, mUnselectedColor)
-                    }
-
-                    changeNextTabTextColor(position, positionOffset, mSelectedColor, mUnselectedColor)
+                if (position != mTabLayout.tabCount - 1) {
+                    changeNextTabTextColor(position + 1, 1 - positionOffset, mSelectedColor, mUnselectedColor)
+                }
+            } else {
+                if (position != mTabLayout.tabCount - 1) {
+                    changeCurrentTabTextColor(position + 1, 1 - positionOffset, mSelectedColor, mUnselectedColor)
                 }
 
-                lastSumPosAndPosOffset = positionOffset + position
+                changeNextTabTextColor(position, positionOffset, mSelectedColor, mUnselectedColor)
             }
 
-        } else {
-            if (position == 0 && mOnlyOnce) {
-                mCurrentIndex = 0
-                mCurrentTextView = getTextViewReference(mCurrentIndex)
-                mCurrentTextView!!.setTextColor(mSelectedColor)
-            }
+            lastSumPosAndPosOffset = positionOffset + position
         }
     }
 
-    override fun onPageSelected(position: Int) {
-        mOnlyOnce = false
-    }
+    override fun onPageSelected(position: Int) {}
 
     override fun onPageScrollStateChanged(state: Int) {
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
-            if (state == SCROLL_STATE_DRAGGING) {
-                mIsClicked = false
-            } else if (state == SCROLL_STATE_IDLE) {
-                mCurrentTextView = null
-                mNextTextView = null
-                mIsClicked = true
-            }
+        if (state == SCROLL_STATE_DRAGGING) {
+            mIsClicked = false
+        } else if (state == SCROLL_STATE_IDLE) {
+            mCurrentTextView = null
+            mNextTextView = null
+            mIsClicked = true
         }
     }
 
@@ -114,7 +99,7 @@ class TabLayoutInterpolationListener(tabLayout: TabLayout, context: Context) : V
         }
     }
 
-    private fun changeCurrentTabTextColor(position: Int, isSelected: Boolean, positionOffset: Float, firstColor: Int, secondColor: Int) {
+    private fun changeCurrentTabTextColor(position: Int, positionOffset: Float, firstColor: Int, secondColor: Int) {
         if (mCurrentTextView == null || mIsInitialized)
             mCurrentTextView = getTextViewReference(position)
 
